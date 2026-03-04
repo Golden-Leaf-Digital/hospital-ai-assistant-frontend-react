@@ -2,10 +2,9 @@ import Button from "@/components/Button";
 import Input from "@/components/Input";
 import Label from "@/components/Label";
 import axios from "axios";
-import { Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-
 export default function SignUpPage() {
   const navigate = useNavigate();
 
@@ -167,12 +166,15 @@ export default function SignUpPage() {
         );
 
         localStorage.setItem("token", res.data);
-        navigate("/dashboard");
+        navigate("/");
       }
     } catch (err) {
       setMessage({
         text:
-          err.response?.data || "Something went wrong",
+  err.response?.data?.message ||
+  err.response?.data ||
+  err.message ||
+  "Something went wrong",
         type: "error",
       });
     }
@@ -261,25 +263,65 @@ export default function SignUpPage() {
             )}
 
             {step === 3 && (
-              <>
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  value={form.password}
-                  onChange={handleChange}
-                />
-                <Input
-                  id="confirmPassword"
-                  type={
-                    showConfirmPassword
-                      ? "text"
-                      : "password"
-                  }
-                  value={form.confirmPassword}
-                  onChange={handleChange}
-                />
-              </>
-            )}
+<>
+{/* PASSWORD */}
+<div className="relative">
+<Label>Password*</Label>
+
+<Input
+id="password"
+type={showPassword ? "text" : "password"}
+value={form.password}
+onChange={handleChange}
+/>
+
+<button
+type="button"
+onClick={() => setShowPassword(!showPassword)}
+className="absolute right-3 top-9 text-gray-500"
+>
+{showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+</button>
+</div>
+
+{/* CONFIRM PASSWORD */}
+<div className="relative">
+<Label>Confirm Password*</Label>
+
+<Input
+id="confirmPassword"
+type={showConfirmPassword ? "text" : "password"}
+value={form.confirmPassword}
+onChange={handleChange}
+/>
+
+<button
+type="button"
+onClick={() =>
+setShowConfirmPassword(!showConfirmPassword)
+}
+className="absolute right-3 top-9 text-gray-500"
+>
+{showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+</button>
+
+{/* PASSWORD MATCH CHECK */}
+{form.confirmPassword && (
+<p
+className={`text-sm mt-1 ${
+form.password === form.confirmPassword
+? "text-green-600"
+: "text-red-600"
+}`}
+>
+{form.password === form.confirmPassword
+? "Passwords match"
+: "Passwords do not match"}
+</p>
+)}
+</div>
+</>
+)}
 
             {message.text && (
               <p
