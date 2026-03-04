@@ -6,13 +6,22 @@ import OrgUsersList from "./create-org-user/OrgUsersList";
 
 export default function AdminDashboardPage() {
 
-  const token = localStorage.getItem("token");
-  let orgId = "";
+ const token = localStorage.getItem("token");
 
-  if (token) {
+let orgId = "org-62484079";
+
+if (token) {
+  try {
     const decoded = jwtDecode(token);
-    orgId = decoded.orgId;
+    orgId =
+      decoded.orgId ||
+      decoded.organizationId ||
+      decoded.org ||
+      "org-62484079";
+  } catch (err) {
+    console.error("Invalid token", err);
   }
+}
 
   return (
     <div className="p-8">
