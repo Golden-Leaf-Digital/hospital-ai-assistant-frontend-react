@@ -18,44 +18,63 @@ export default function WhatsAppWeb() {
   }, []);
 
   const openChat = async (conv) => {
+  try {
     setSelected(conv);
+    setMessages([]);
 
     const res = await fetch(
       `http://localhost:3001/api/messages/${conv.id}`
     );
+
     const data = await res.json();
-    setMessages(data);
-  };
+
+    setMessages(Array.isArray(data) ? data : []);
+
+  } catch (err) {
+    console.error("Failed loading chat", err);
+  }
+};
 
   useEffect(() => {
-    socket.on("new-message", ({ conversationId, message }) => {
 
-      if (selected?.id === conversationId) {
-        setMessages(prev => [...prev, message]);
+  const handler = ({ conversationId, message }) => {
+
+    setMessages(prev => {
+      if (selected && selected.id === conversationId) {
+        return [...prev, message];
       }
-
-      setConversations(prev => {
-        const exists = prev.find(c => c.id === conversationId);
-
-        if (!exists) {
-          fetch("http://localhost:3001/api/conversations")
-            .then(res => res.json())
-            .then(setConversations);
-          return prev;
-        }
-
-        return prev.map(c =>
-          c.id === conversationId
-            ? { ...c, last_message: message.text_message || "Media" }
-            : c
-        );
-      });
+      return prev;
     });
 
-    return () => {
-      socket.off("new-message");
-    };
-  }, [selected]);
+    setConversations(prev => {
+
+      const exists = prev.find(c => c.id === conversationId);
+
+      if (!exists) {
+        fetch("http://localhost:3001/api/conversations")
+          .then(res => res.json())
+          .then(setConversations);
+
+        return prev;
+      }
+
+      return prev.map(c =>
+        c.id === conversationId
+          ? { ...c, last_message: message.text_message || "Media" }
+          : c
+      );
+
+    });
+
+  };
+
+  socket.on("new-message", handler);
+
+  return () => {
+    socket.off("new-message", handler);
+  };
+
+}, []);
 
   return (
     <div style={styles.container}>

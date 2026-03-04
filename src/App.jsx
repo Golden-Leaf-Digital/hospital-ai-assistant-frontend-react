@@ -63,9 +63,9 @@ export default function App() {
         <Route
           path="/sign-up"
           element={
-            <publicRoute>
+            <PublicRoute>
                  <SignUpPage />
-            </publicRoute>
+            </PublicRoute>
           }
         />
 
@@ -221,6 +221,23 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+  path="/receptionist/dashboard/insurance-leads"
+  element={
+    <ProtectedRoute allowedRoles={["RECEPTIONIST"]}>
+      <InsuranceLeadsDashboard />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/receptionist/dashboard/billing-leads"
+  element={
+    <ProtectedRoute allowedRoles={["RECEPTIONIST"]}>
+      <BillingLeadsDashboard />
+    </ProtectedRoute>
+  }
+/>
 
         {/* SUPERADMIN */}
         <Route

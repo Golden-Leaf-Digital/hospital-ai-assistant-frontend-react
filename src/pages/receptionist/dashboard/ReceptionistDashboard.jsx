@@ -10,11 +10,20 @@ export default function ReceptionistDashboard() {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const token = localStorage.getItem("token");
+
 let orgId = "org-62484079";
 
 if (token) {
-  const decoded = jwtDecode(token);
-  orgId = decoded.orgId;
+  try {
+    const decoded = jwtDecode(token);
+    orgId =
+      decoded.orgId ||
+      decoded.organizationId ||
+      decoded.org ||
+      "org-62484079";
+  } catch (err) {
+    console.error("Invalid token", err);
+  }
 }
 
   useEffect(() => {
@@ -56,17 +65,17 @@ if (token) {
           </Button>
         </Link>
 
-        <Link to="/insurance/dashboard/insurance-leads">
-          <Button className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg">
-            Insurance Leads
-          </Button>
-        </Link>
+        <Link to="/receptionist/dashboard/insurance-leads">
+  <Button className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg">
+    Insurance Leads
+  </Button>
+</Link>
 
-        <Link to="/billing/dashboard/billing-leads">
-          <Button className="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2 rounded-lg">
-            Billing Leads
-          </Button>
-        </Link>
+<Link to="/receptionist/dashboard/billing-leads">
+  <Button className="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2 rounded-lg">
+    Billing Leads
+  </Button>
+</Link>
         <Link to={`/${orgId}/whatsapp`}>
   <Button className="bg-green-500 hover:bg-green-600 text-white px-5 py-2 rounded-lg">
     WhatsApp Web
