@@ -158,7 +158,7 @@ function MessageBubble({ msg }) {
         color: isBot ? "#fff" : "#000"
       }}
     >
-      {msg.type === "text" && msg.text_message}
+      {msg.type === "text" && (msg.text_message || msg.content)}
 
       {msg.type === "image" && (
         <img
