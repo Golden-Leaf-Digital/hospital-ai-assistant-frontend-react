@@ -2,12 +2,20 @@ import AppointmentTable from "@/components/AppointmentTable";
 import Button from "@/components/Button";
 import DashboardNavbar from "@/components/DashboardNavbar";
 import axiosInstance from "@/utils/axiosInstance";
+import { jwtDecode } from "jwt-decode";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 export default function ReceptionistDashboard() {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const token = localStorage.getItem("token");
+let orgId = "org-62484079";
+
+if (token) {
+  const decoded = jwtDecode(token);
+  orgId = decoded.orgId;
+}
 
   useEffect(() => {
     fetchAppointments();
@@ -59,6 +67,11 @@ export default function ReceptionistDashboard() {
             Billing Leads
           </Button>
         </Link>
+        <Link to={`/${orgId}/whatsapp`}>
+  <Button className="bg-green-500 hover:bg-green-600 text-white px-5 py-2 rounded-lg">
+    WhatsApp Web
+  </Button>
+</Link>
       </div>
 
       {/* Appointment Table */}

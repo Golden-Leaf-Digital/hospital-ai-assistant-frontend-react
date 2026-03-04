@@ -1,6 +1,5 @@
-import Button from "@/components/Button";
 import DashboardNavbar from "@/components/DashboardNavbar";
-import { Link } from "react-router-dom";
+import InsuranceLeadsDashboard from "./insurance-leads/InsuranceLeadsDashboard";
 export default function InsuranceDashboard() {
   return (
     <div className="min-h-screen bg-gray-50 p-8">
@@ -13,11 +12,7 @@ export default function InsuranceDashboard() {
         <DashboardNavbar />
       </div>
 
-      <Link to="/insurance/dashboard/insurance-leads">
-        <Button className="text-white px-6 py-3 rounded-xl shadow-md">
-          Insurance Enquiries
-        </Button>
-      </Link>
+      <InsuranceLeadsDashboard />
     </div>
   );
 }

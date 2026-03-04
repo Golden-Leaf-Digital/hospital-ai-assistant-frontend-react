@@ -318,7 +318,14 @@ export default function HomePage() {
   //   }, 4000);
   //   return () => clearInterval(t);
   // }, [showReception, autoRefresh, receptionApiUrl]);
-  
+  function handleLogout() {
+  localStorage.removeItem("token");
+  localStorage.removeItem(LS_SESSION_KEY);
+  localStorage.removeItem(LS_MESSAGES_KEY);
+  localStorage.removeItem(LS_EXTERNAL_ID_KEY);
+
+  window.location.href = "/login";
+}
   return (
     <div
       style={{ minHeight: "100vh", background: "#f9fafb", color: "#111827" }}
@@ -395,8 +402,8 @@ export default function HomePage() {
     borderRadius: 10,
     border: "1px solid #e5e7eb",
     fontSize: 13,
-    color: "#111827",
-    background: "#ffffff",
+    color: "rgb(255, 255, 255)",
+    background: "#ef4444",
   }}
 >
   QR
@@ -415,6 +422,21 @@ export default function HomePage() {
 >
   New chat
 </button>
+{/* Logout */}
+  <button
+    onClick={handleLogout}
+    style={{
+      padding: "8px 12px",
+      borderRadius: 10,
+      border: "1px solid #e5e7eb",
+      background: "#ef4444",
+      color: "#ffffff",
+      cursor: "pointer",
+      fontSize: 13,
+    }}
+  >
+    Logout
+  </button>
             {/* <Link to="/login">
               <button
                 style={{

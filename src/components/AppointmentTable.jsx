@@ -1,8 +1,8 @@
+import { Phone } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { deleteAppointment, updateAppointment } from "./appointment";
 import Button from "./Button";
 import DoctorNoteModal from "./DoctorNoteModal";
-
 export default function AppointmentTable({ appointments }) {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
@@ -164,7 +164,21 @@ export default function AppointmentTable({ appointments }) {
                   >
                     {a.patientName}
                   </td>
-                  <td className="p-3">{a.patientPhone}</td>
+                  <td className="p-3">
+  <div className="flex items-center gap-2">
+    {a.patientPhone || "N/A"}
+
+    {a.patientPhone && (
+      <a
+        href={`tel:${a.patientPhone}`}
+        className="text-green-600 hover:text-green-800"
+        title="Call patient"
+      >
+        <Phone size={18} />
+      </a>
+    )}
+  </div>
+</td>
                   <td className="p-3">{a.doctorName}</td>
                   <td className="p-3">{a.department}</td>
                   <td className="p-3">

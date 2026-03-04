@@ -15,42 +15,50 @@ export default function HospitalsPage() {
   }, []);
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "#0b1220",
-        color: "#fff",
-        padding: 40,
-        fontFamily: "sans-serif",
-      }}
-    >
-      <h1 style={{ fontSize: 32 }}>Select Hospital</h1>
+    <div className="min-h-screen bg-gray-50 p-10">
 
-      {loading && <p>Loading hospitals...</p>}
+      {/* Page Title */}
+      <div className="max-w-5xl mx-auto mb-10">
+        <h1 className="text-3xl font-bold">
+          Select Hospital
+        </h1>
 
-      <div style={{ display: "grid", gap: 20, marginTop: 30 }}>
-        {orgs.map((org) => (
-          <Link
-            key={org.orgId}
-            to={`/${org.orgId}/webchat`}
-            style={{
-              padding: 20,
-              border: "1px solid rgba(255,255,255,0.2)",
-              borderRadius: 14,
-              textDecoration: "none",
-              fontSize: 20,
-              width: 360,
-              background: "rgba(255,255,255,0.05)",
-              color: "#fff",
-            }}
-          >
-            <div>{org.orgName}</div>
-            <div style={{ fontSize: 12, opacity: 0.7 }}>
-              Open AI Assistant →
-            </div>
-          </Link>
-        ))}
+        <p className="text-gray-500 mt-1">
+          Choose your hospital to start chatting with the AI assistant
+        </p>
       </div>
+
+      {/* Content */}
+      <div className="max-w-5xl mx-auto">
+
+        {loading && (
+          <p className="text-gray-500">Loading hospitals...</p>
+        )}
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+          {orgs.map((org) => (
+            <Link
+  key={org.orgId}
+  to={`/${org.orgId}/webchat`}
+  className="bg-white shadow rounded-xl p-6 border transition 
+             hover:border-red-500 hover:shadow-xl hover:scale-[1.02] 
+             group"
+>
+  <div className="text-xl font-semibold group-hover:text-red-500">
+    {org.orgName}
+  </div>
+
+  <p className="text-gray-500 text-sm mt-2 group-hover:text-red-400">
+    Open AI Assistant →
+  </p>
+</Link>
+          ))}
+
+        </div>
+
+      </div>
+
     </div>
   );
 }

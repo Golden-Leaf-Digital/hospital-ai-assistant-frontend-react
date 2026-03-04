@@ -66,9 +66,17 @@ export default function ProtectedRoute({ children, allowedRoles }) {
 
     /* ================= BASE PATH PROTECTION ================= */
 
-    if (!pathname.startsWith(allowedBasePath)) {
-      return <Navigate to={`${allowedBasePath}/dashboard`} replace />;
-    }
+    /* ================= ALLOW WHATSAPP ROUTE ================= */
+
+if (/^\/[^/]+\/whatsapp$/.test(pathname)) {
+  return children;
+}
+
+/* ================= BASE PATH PROTECTION ================= */
+
+if (!pathname.startsWith(allowedBasePath)) {
+  return <Navigate to={`${allowedBasePath}/dashboard`} replace />;
+}
 
     return children;
   } catch {

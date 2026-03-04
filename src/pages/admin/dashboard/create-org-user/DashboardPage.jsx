@@ -1,6 +1,5 @@
 import DashboardNavbar from "@/components/DashboardNavbar";
 import CreateOrgUserForm from "./CreateOrgUserForm";
-import OrgUsersList from "./OrgUsersList";
 
 export default function DashboardPage() {
   return (
@@ -23,9 +22,9 @@ export default function DashboardPage() {
   </div>
 
   {/* 70% Table */}
-  <div className="lg:col-span-7">
+  {/* <div className="lg:col-span-7">
     <OrgUsersList />
-  </div>
+  </div> */}
 </div>
     </div>
   );

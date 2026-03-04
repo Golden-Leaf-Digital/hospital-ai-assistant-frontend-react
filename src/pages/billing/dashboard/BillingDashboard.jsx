@@ -1,6 +1,5 @@
-import Button from "@/components/Button";
 import DashboardNavbar from "@/components/DashboardNavbar";
-import { Link } from "react-router-dom";
+import BillingLeadsDashboard from "./billing-leads/BillingLeadsDashboard";
 
 export default function BillingDashboard() {
   return (
@@ -14,11 +13,7 @@ export default function BillingDashboard() {
             <DashboardNavbar />
           </div>
     
-          <Link to="/billing/dashboard/billing-leads">
-            <Button className="text-white px-6 py-3 rounded-xl shadow-md">
-              Billing Enquiries
-            </Button>
-          </Link>
+          <BillingLeadsDashboard/>
         </div>
   );
 }

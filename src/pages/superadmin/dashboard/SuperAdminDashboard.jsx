@@ -1,7 +1,6 @@
-import Button from "@/components/Button";
 import DashboardNavbar from "@/components/DashboardNavbar";
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import CreateOrganizationForm from "./create-organization/CreateOrganizationForm";
 import { getOrganizations } from "./create-organization/OrgActions";
 import OrganizationTable from "./create-organization/OrganizationTable";
 
@@ -25,18 +24,24 @@ export default function SuperAdminDashboard() {
         <h1 className="text-3xl font-bold">
           Super Admin Dashboard
         </h1>
-
         <DashboardNavbar />
       </div>
 
-      {/* Action Button */}
-      <Link to="/superadmin/dashboard/create-organization">
-        <Button className="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg mb-6">
-          Create Organization
-        </Button>
-      </Link>
+      {/* Layout */}
+      <div className="grid lg:grid-cols-10 gap-8">
 
-      <OrganizationTable organizations={orgs} />
+        {/* Create Organization Form */}
+        <div className="lg:col-span-3">
+          <CreateOrganizationForm />
+        </div>
+
+        {/* Organization Table */}
+        <div className="lg:col-span-7">
+          <OrganizationTable organizations={orgs} />
+        </div>
+
+      </div>
+
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import Button from "@/components/Button";
-import DashboardNavbar from "@/components/DashboardNavbar";
+import { Phone } from "lucide-react";
 import { useEffect, useState } from "react";
+
 export default function InsuranceLeadsDashboard() {
   const [leads, setLeads] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -53,10 +54,7 @@ const [dateFilter, setDateFilter] = useState("");
       .includes(search.toLowerCase()) ||
     (lead.phone || "")
       .toLowerCase()
-      .includes(search.toLowerCase()) ||
-    (lead.source || "")
-      .toLowerCase()
-      .includes(search.toLowerCase());
+      .includes(search.toLowerCase()) ;
 
   const matchesDate = dateFilter
     ? new Date(lead.createdAt)
@@ -76,11 +74,9 @@ const [dateFilter, setDateFilter] = useState("");
   {/* Title + Back */}
   <div className="flex items-center justify-between mb-6">
     
-    <h1 className="text-3xl font-bold">
-      Insurance Enquiries
-    </h1>
-    <DashboardNavbar />
-
+    <h2 className="text-xl font-semibold mb-6">
+  Insurance Enquiries
+</h2>
     {/* <Link to="/insurance/dashboard">
       <Button className="text-white px-4 py-2">
         ← Back to Dashboard
@@ -92,7 +88,7 @@ const [dateFilter, setDateFilter] = useState("");
   <div className="flex flex-wrap gap-4 mb-6 items-center">
   <input
     type="text"
-    placeholder="Search name / phone / source..."
+    placeholder="Search name / phone..."
     value={search}
     onChange={(e) => setSearch(e.target.value)}
     className="border px-4 py-2 rounded-lg w-72"
@@ -124,7 +120,6 @@ const [dateFilter, setDateFilter] = useState("");
               <th className="px-4 py-3 text-left">ID</th>
               <th className="px-4 py-3 text-left">Name</th>
               <th className="px-4 py-3 text-left">Phone</th>
-              <th className="px-4 py-3 text-left">Source</th>
               <th className="px-4 py-3 text-left">Created At</th>
             </tr>
           </thead>
@@ -132,7 +127,7 @@ const [dateFilter, setDateFilter] = useState("");
           <tbody>
             {leads.length === 0 ? (
               <tr>
-                <td colSpan={5} className="text-center py-6">
+                <td colSpan={4} className="text-center py-6">
                   No insurance leads found.
                 </td>
               </tr>
@@ -141,8 +136,21 @@ const [dateFilter, setDateFilter] = useState("");
                 <tr key={lead.id} className="border-t">
                   <td className="px-4 py-3">{lead.id}</td>
                   <td className="px-4 py-3">{lead.name}</td>
-                  <td className="px-4 py-3">{lead.phone}</td>
-                  <td className="px-4 py-3">{lead.source}</td>
+                  <td className="px-4 py-3">
+  <div className="flex items-center gap-2">
+    <span>{lead.phone || "N/A"}</span>
+
+    {lead.phone && (
+      <a
+        href={`tel:${lead.phone}`}
+        className="bg-green-100 text-green-700 p-1 rounded-full hover:bg-green-200 transition"
+        title="Call"
+      >
+        <Phone size={16} />
+      </a>
+    )}
+  </div>
+</td>
                   <td className="px-4 py-3">
                     {new Date(lead.createdAt).toLocaleString()}
                   </td>

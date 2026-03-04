@@ -1,3 +1,4 @@
+import { Phone } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
   deleteOrgUserAction,
@@ -192,7 +193,19 @@ const [roleFilter, setRoleFilter] = useState("");
                 <>
                   <td className="border p-2">{u.name}</td>
                   <td className="border p-2">{u.email}</td>
-                  <td className="border p-2">{u.mobile}</td>
+                  <td className="border p-2">
+  <div className="flex items-center gap-2">
+    {u.mobile}
+
+    <a
+      href={`tel:${u.mobile}`}
+      className="text-green-600 hover:text-green-800"
+      title="Call"
+    >
+      <Phone size={18} />
+    </a>
+  </div>
+</td>
                   <td className="border p-2">{u.userRoleName}</td>
 
                   <td className="border p-2 space-x-2">
