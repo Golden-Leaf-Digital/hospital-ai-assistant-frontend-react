@@ -3,6 +3,7 @@ import { Navigate, useLocation } from "react-router-dom";
 
 const roleBasePath = {
   USER: "/",
+  PATIENT: "/",
   ADMIN: "/admin",
   SUPERADMIN: "/superadmin",
   DOCTOR: "/doctor",
@@ -15,9 +16,10 @@ export default function ProtectedRoute({ children, allowedRoles }) {
   const location = useLocation();
   const token = localStorage.getItem("token");
 
-  if (!token) {
-    return <Navigate to="/login" replace />;
-  }
+ if (!token) {
+  const orgId = location.pathname.split("/")[1];
+  return <Navigate to={`/${orgId}/otp-login`} replace />;
+}
 
   try {
     const decoded = jwtDecode(token);
@@ -25,7 +27,7 @@ export default function ProtectedRoute({ children, allowedRoles }) {
     // Expiry check
     if (decoded?.exp * 1000 < Date.now()) {
       localStorage.removeItem("token");
-      return <Navigate to="/login" replace />;
+      return <Navigate to={`/${orgId}/otp-login`} replace />;
     }
 
     const role = decoded?.role;
@@ -35,10 +37,10 @@ export default function ProtectedRoute({ children, allowedRoles }) {
 
     if (!allowedBasePath) {
       localStorage.removeItem("token");
-      return <Navigate to="/login" replace />;
+      return <Navigate to={`/${orgId}/otp-login`} replace />;
     }
 
-      /* ================= ROLE-BASED ROUTE RESTRICTION ================= */
+    /* ================= ROLE-BASED ROUTE RESTRICTION ================= */
 
     // 🔒 If specific roles are required (like WhatsApp)
     if (allowedRoles && !allowedRoles.includes(role)) {
@@ -47,11 +49,8 @@ export default function ProtectedRoute({ children, allowedRoles }) {
 
     /* ================= USER SPECIAL CASE ================= */
 
-    if (role === "USER") {
-      if (
-        pathname === "/" ||
-        /^\/[^/]+\/webchat$/.test(pathname)
-      ) {
+    if (role === "USER" || role === "PATIENT") {
+      if (pathname === "/" || /^\/[^/]+\/webchat$/.test(pathname)) {
         return children;
       }
 
@@ -68,19 +67,25 @@ export default function ProtectedRoute({ children, allowedRoles }) {
 
     /* ================= ALLOW WHATSAPP ROUTE ================= */
 
-if (/^\/[^/]+\/whatsapp$/.test(pathname)) {
-  return children;
-}
+    if (/^\/[^/]+\/whatsapp$/.test(pathname)) {
+      return children;
+    }
 
-/* ================= BASE PATH PROTECTION ================= */
+    /* ================= BASE PATH PROTECTION ================= */
 
-if (!pathname.startsWith(allowedBasePath)) {
-  return <Navigate to={`${allowedBasePath}/dashboard`} replace />;
-}
+    if (!pathname.startsWith(allowedBasePath)) {
+      return <Navigate to={`${allowedBasePath}/dashboard`} replace />;
+    }
 
     return children;
   } catch {
     localStorage.removeItem("token");
-    return <Navigate to="/login" replace />;
+    return (
+  <Navigate
+    to={`/${orgId}/otp-login`}
+    state={{ from: location.pathname }}
+    replace
+  />
+);
   }
 }

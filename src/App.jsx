@@ -41,22 +41,22 @@ import ReceptionistDashboard from "./pages/receptionist/dashboard/ReceptionistDa
 /* ================= SUPERADMIN ================= */
 import CreateOrganizationPage from "./pages/superadmin/dashboard/create-organization/CreateOrganizationPage";
 import SuperAdminDashboard from "./pages/superadmin/dashboard/SuperAdminDashboard";
+import OtpLoginPage from "./pages/otp-login/OtpLoginPage";
+import OrgRedirect from "./routes/OrgRedirect";
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        
         <Route path="/" element={<HospitalsPage />} />
         {/* ================= PUBLIC ROUTES ================= */}
 
         <Route
-          path="/login"
+          path="/:orgId/otp-login"
           element={
-              <PublicRoute>
-                <LoginPage />
-              </PublicRoute>
-           
+            <PublicRoute>
+              <OtpLoginPage />
+            </PublicRoute>
           }
         />
 
@@ -64,7 +64,7 @@ export default function App() {
           path="/sign-up"
           element={
             <PublicRoute>
-                 <SignUpPage />
+              <SignUpPage />
             </PublicRoute>
           }
         />
@@ -72,10 +72,9 @@ export default function App() {
         <Route
           path="/forgot-password"
           element={
-           <PublicRoute>
+            <PublicRoute>
               <ForgotPasswordPage />
             </PublicRoute>
-            
           }
         />
 
@@ -85,23 +84,24 @@ export default function App() {
         <Route path="/voice-deepgram" element={<VoiceDeepgramSessionsPage />} />
 
         {/* ================= ORG DYNAMIC ROUTES ================= */}
-
+        <Route path="/:orgId/login" element={<LoginPage />} />
+        <Route path="/:orgId" element={<OrgRedirect />} />
         <Route
-  path="/:orgId/webchat"
-  element={
-    <ProtectedRoute>
-      <HomePage />
-    </ProtectedRoute>
-  }
-/>
+          path="/:orgId/webchat"
+          element={
+            <ProtectedRoute>
+              <HomePage />
+            </ProtectedRoute>
+          }
+        />
         <Route
-  path="/:orgId/whatsapp"
-  element={
-    <ProtectedRoute allowedRoles={["ADMIN", "RECEPTIONIST"]}>
-      <WhatsappWeb />
-    </ProtectedRoute>
-  }
-/>
+          path="/:orgId/whatsapp"
+          element={
+            <ProtectedRoute allowedRoles={["ADMIN", "RECEPTIONIST"]}>
+              <WhatsappWeb />
+            </ProtectedRoute>
+          }
+        />
 
         {/* ================= PROTECTED ROUTES ================= */}
 
@@ -118,7 +118,7 @@ export default function App() {
         <Route
           path="/admin/dashboard/create-org-user"
           element={
-             <ProtectedRoute>
+            <ProtectedRoute>
               <DashboardPage />
             </ProtectedRoute>
           }
@@ -128,21 +128,18 @@ export default function App() {
         <Route
           path="/billing/dashboard"
           element={
-            
-              <ProtectedRoute>
+            <ProtectedRoute>
               <BillingDashboard />
             </ProtectedRoute>
-           
           }
         />
 
         <Route
           path="/billing/dashboard/billing-leads"
           element={
-         <ProtectedRoute>
+            <ProtectedRoute>
               <BillingLeadsDashboard />
             </ProtectedRoute>
-            
           }
         />
 
@@ -153,7 +150,6 @@ export default function App() {
             <ProtectedRoute>
               <DoctorDashboard />
             </ProtectedRoute>
-          
           }
         />
 
@@ -169,7 +165,7 @@ export default function App() {
         <Route
           path="/doctor/dashboard/schedule"
           element={
-             <ProtectedRoute>
+            <ProtectedRoute>
               <DoctorSchedulePage />
             </ProtectedRoute>
           }
@@ -178,7 +174,7 @@ export default function App() {
         <Route
           path="/doctor/dashboard/schedule/time-off"
           element={
-             <ProtectedRoute>
+            <ProtectedRoute>
               <DoctorTimeOffPage />
             </ProtectedRoute>
           }
@@ -188,7 +184,7 @@ export default function App() {
         <Route
           path="/insurance/dashboard"
           element={
-             <ProtectedRoute>
+            <ProtectedRoute>
               <InsuranceDashboard />
             </ProtectedRoute>
           }
@@ -197,7 +193,7 @@ export default function App() {
         <Route
           path="/insurance/dashboard/insurance-leads"
           element={
-           <ProtectedRoute>
+            <ProtectedRoute>
               <InsuranceLeadsDashboard />
             </ProtectedRoute>
           }
@@ -207,7 +203,7 @@ export default function App() {
         <Route
           path="/receptionist/dashboard"
           element={
-         <ProtectedRoute>
+            <ProtectedRoute>
               <ReceptionistDashboard />
             </ProtectedRoute>
           }
@@ -222,28 +218,28 @@ export default function App() {
           }
         />
         <Route
-  path="/receptionist/dashboard/insurance-leads"
-  element={
-    <ProtectedRoute allowedRoles={["RECEPTIONIST"]}>
-      <InsuranceLeadsDashboard />
-    </ProtectedRoute>
-  }
-/>
+          path="/receptionist/dashboard/insurance-leads"
+          element={
+            <ProtectedRoute allowedRoles={["RECEPTIONIST"]}>
+              <InsuranceLeadsDashboard />
+            </ProtectedRoute>
+          }
+        />
 
-<Route
-  path="/receptionist/dashboard/billing-leads"
-  element={
-    <ProtectedRoute allowedRoles={["RECEPTIONIST"]}>
-      <BillingLeadsDashboard />
-    </ProtectedRoute>
-  }
-/>
+        <Route
+          path="/receptionist/dashboard/billing-leads"
+          element={
+            <ProtectedRoute allowedRoles={["RECEPTIONIST"]}>
+              <BillingLeadsDashboard />
+            </ProtectedRoute>
+          }
+        />
 
         {/* SUPERADMIN */}
         <Route
           path="/superadmin/dashboard"
           element={
-         <ProtectedRoute>
+            <ProtectedRoute>
               <SuperAdminDashboard />
             </ProtectedRoute>
           }
@@ -252,12 +248,11 @@ export default function App() {
         <Route
           path="/superadmin/dashboard/create-organization"
           element={
-           <ProtectedRoute>
+            <ProtectedRoute>
               <CreateOrganizationPage />
             </ProtectedRoute>
           }
         />
-
       </Routes>
     </BrowserRouter>
   );

@@ -4,10 +4,11 @@ import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const { orgId } = useParams();
   const BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
 
   const [form, setForm] = useState({ mobile: "", password: "" });
@@ -96,6 +97,7 @@ export default function LoginPage() {
 
       localStorage.setItem("token", token);
       localStorage.setItem("username", JSON.stringify(form.mobile));
+      localStorage.setItem("orgId", orgId);
       window.dispatchEvent(new Event("tokenUpdated"));
 
       const isHttps = window.location.protocol === "https:";
@@ -145,10 +147,10 @@ export default function LoginPage() {
             </button>
 
             <Link
-              to="/sign-up"
+              to={`/${orgId}/otp-login`}
               className="px-10 py-3 rounded-lg border border-[#FF4242] text-[#FF4242] font-semibold"
             >
-              Sign Up
+              Log In (Patient)
             </Link>
           </div>
 
