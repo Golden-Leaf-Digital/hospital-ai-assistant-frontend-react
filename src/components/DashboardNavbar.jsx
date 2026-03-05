@@ -10,16 +10,15 @@ export default function DashboardNavbar() {
     fetchUser();
   }, []);
   useEffect(() => {
-  function handleClickOutside(e) {
-    if (!e.target.closest(".profile-dropdown")) {
-      setOpen(false);
+    function handleClickOutside(e) {
+      if (!e.target.closest(".profile-dropdown")) {
+        setOpen(false);
+      }
     }
-  }
 
-  document.addEventListener("click", handleClickOutside);
-  return () =>
-    document.removeEventListener("click", handleClickOutside);
-}, []);
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, []);
 
   async function fetchUser() {
     try {
@@ -31,7 +30,7 @@ export default function DashboardNavbar() {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       if (!res.ok) throw new Error("Failed to fetch user");
@@ -44,22 +43,24 @@ export default function DashboardNavbar() {
   }
 
   const handleLogout = () => {
+    const orgId = localStorage.getItem("orgId");
     localStorage.removeItem("token");
-    window.location.href = "/login";
+    window.location.href = `/${orgId}/otp-login`;
   };
-  const dashboardMap = {
-  insurance: "/insurance/dashboard",
-  receptionist: "/receptionist/dashboard",
-  doctor: "/doctor/dashboard",
-  admin: "/admin/dashboard",
-  superadmin: "/superadmin/dashboard",
-  billing: "/billing/dashboard",
-};
 
-const dashboardPath =
-  user?.role && dashboardMap[user.role.toLowerCase()]
-    ? dashboardMap[user.role.toLowerCase()]
-    : "/";
+  const dashboardMap = {
+    insurance: "/insurance/dashboard",
+    receptionist: "/receptionist/dashboard",
+    doctor: "/doctor/dashboard",
+    admin: "/admin/dashboard",
+    superadmin: "/superadmin/dashboard",
+    billing: "/billing/dashboard",
+  };
+
+  const dashboardPath =
+    user?.role && dashboardMap[user.role.toLowerCase()]
+      ? dashboardMap[user.role.toLowerCase()]
+      : "/";
 
   return (
     <div className="flex justify-end items-center relative mb-6 profile-dropdown">
@@ -69,26 +70,17 @@ const dashboardPath =
         className="flex items-center gap-2 cursor-pointer bg-gray-100 px-4 py-2 rounded-full hover:bg-gray-200 transition"
       >
         <User size={18} />
-        <span className="font-medium">
-          {user?.fullName || "Profile"}
-        </span>
+        <span className="font-medium">{user?.fullName || "Profile"}</span>
       </div>
 
       {/* Dropdown */}
       {open && (
         <div className="absolute right-0 top-14 w-72 bg-white shadow-xl rounded-xl p-4 z-50 border">
-          
           {/* User Info */}
           <div className="mb-4 border-b pb-3">
-            <p className="font-semibold text-gray-800">
-              {user?.fullName}
-            </p>
-            <p className="text-sm text-gray-500">
-              📧 {user?.email}
-            </p>
-            <p className="text-sm text-gray-500">
-              📱 {user?.mobile}
-            </p>
+            <p className="font-semibold text-gray-800">{user?.fullName}</p>
+            <p className="text-sm text-gray-500">📧 {user?.email}</p>
+            <p className="text-sm text-gray-500">📱 {user?.mobile}</p>
           </div>
 
           {/* Profile */}
@@ -101,15 +93,15 @@ const dashboardPath =
           </Link>
 
           {/* My Dashboard */}
-         {user?.role && (
-  <Link
-    to={dashboardPath}
-    className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition text-gray-700"
-  >
-    <LayoutDashboard size={16} />
-    My Dashboard
-  </Link>
-)}
+          {user?.role && (
+            <Link
+              to={dashboardPath}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition text-gray-700"
+            >
+              <LayoutDashboard size={16} />
+              My Dashboard
+            </Link>
+          )}
 
           {/* Logout */}
           <button

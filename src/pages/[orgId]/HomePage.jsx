@@ -1,12 +1,8 @@
-
 import DashboardNavbar from "@/components/DashboardNavbar";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 function backendBaseUrl() {
-  return (
-    import.meta.env.VITE_GATEWAY_BASE_URL ||
-    "http://localhost:3001"
-  );
+  return import.meta.env.VITE_GATEWAY_BASE_URL || "http://localhost:3001";
 }
 
 function brainBaseUrl() {
@@ -19,6 +15,7 @@ const LS_EXTERNAL_ID_KEY = "hai_external_id";
 
 function formatSlotLabel(slot) {
   if (!slot.startAt || !slot.endAt) return "";
+
   const start = new Date(slot.startAt);
   const end = new Date(slot.endAt);
 
@@ -32,10 +29,13 @@ function formatSlotLabel(slot) {
   const startTime = start.toLocaleTimeString([], {
     hour: "2-digit",
     minute: "2-digit",
+    hour12: true,
   });
+
   const endTime = end.toLocaleTimeString([], {
     hour: "2-digit",
     minute: "2-digit",
+    hour12: true,
   });
 
   return `${day} • ${startTime} - ${endTime}`;
@@ -75,6 +75,15 @@ export default function HomePage() {
 
   useEffect(() => {
     const savedSession = localStorage.getItem(LS_SESSION_KEY) || "";
+    const mobile = localStorage.getItem("patientPhone");
+
+    // If logged in but session was created before login → reset session
+    if (mobile && savedSession) {
+      localStorage.removeItem(LS_SESSION_KEY);
+      setSessionId("");
+    } else if (savedSession) {
+      setSessionId(savedSession);
+    }
 
     let ext = localStorage.getItem(LS_EXTERNAL_ID_KEY) || "";
     if (!ext) {
@@ -108,7 +117,7 @@ export default function HomePage() {
 
   const canSend = useMemo(
     () => input.trim().length > 0 && !busy,
-    [input, busy]
+    [input, busy],
   );
 
   // const receptionApiUrl = useMemo(() => {
@@ -124,6 +133,7 @@ export default function HomePage() {
 
     setBusy(true);
     try {
+      const mobile = localStorage.getItem("patientPhone");
       const res = await fetch(`${backendBaseUrl()}/v1/sessions/resolve`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -131,6 +141,7 @@ export default function HomePage() {
           channel: "web",
           externalId: externalId || "local-dev-user",
           orgId: orgId,
+          mobile,
         }),
       });
 
@@ -155,15 +166,18 @@ export default function HomePage() {
     try {
       const sid = await ensureSession();
 
+      const mobile = localStorage.getItem("patientPhone");
       const res = await fetch(`${backendBaseUrl()}/v1/brain/message`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+
         body: JSON.stringify({
           sessionId: sid,
           text: trimmed,
           channel: "web",
           externalId: externalId || "local-dev-user",
           orgId: orgId,
+          mobile,
         }),
       });
 
@@ -182,13 +196,13 @@ export default function HomePage() {
             ...m,
             {
               role: "assistant",
-              text:
-                "Sorry, that slot was just taken by another patient. Let me show you fresh availability…",
+              text: "Sorry, that slot was just taken by another patient. Let me show you fresh availability…",
               ts: Date.now(),
             },
           ]);
 
           const sid = sessionId || (await ensureSession());
+          const mobile = localStorage.getItem("patientPhone");
 
           const retry = await fetch(`${backendBaseUrl()}/v1/brain/message`, {
             method: "POST",
@@ -199,6 +213,7 @@ export default function HomePage() {
               channel: "web",
               externalId,
               orgId,
+              mobile,
             }),
           });
 
@@ -319,13 +334,14 @@ export default function HomePage() {
   //   return () => clearInterval(t);
   // }, [showReception, autoRefresh, receptionApiUrl]);
   function handleLogout() {
-  localStorage.removeItem("token");
-  localStorage.removeItem(LS_SESSION_KEY);
-  localStorage.removeItem(LS_MESSAGES_KEY);
-  localStorage.removeItem(LS_EXTERNAL_ID_KEY);
+    localStorage.removeItem("token");
+    localStorage.removeItem("patientPhone");
+    localStorage.removeItem(LS_SESSION_KEY);
+    localStorage.removeItem(LS_MESSAGES_KEY);
+    localStorage.removeItem(LS_EXTERNAL_ID_KEY);
 
-  window.location.href = "/login";
-}
+    window.location.href = `/${orgId}/otp-login`;
+  }
   return (
     <div
       style={{ minHeight: "100vh", background: "#f9fafb", color: "#111827" }}
@@ -355,26 +371,25 @@ export default function HomePage() {
               flexWrap: "wrap",
             }}
           > */}
-        <header 
-  style={{
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 20,
-  }}
->
-  <div>
-    <h1 style={{ fontSize: 24, fontWeight: 700 }}>
-      Hospital AI Assistant
-    </h1>
-    <div style={{ fontSize: 13, color: "#6b7280" }}>
-      Organization: {orgId}
-    </div>
-  </div>
+        <header
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: 20,
+          }}
+        >
+          <div>
+            <h1 style={{ fontSize: 24, fontWeight: 700 }}>
+              Hospital AI Assistant
+            </h1>
+            <div style={{ fontSize: 13, color: "#6b7280" }}>
+              Organization: {orgId}
+            </div>
+          </div>
 
-   <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-    <DashboardNavbar />
-  
+          <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+            <DashboardNavbar />
 
             {/* <button
               onClick={() => setShowReception((v) => !v)}
@@ -393,50 +408,49 @@ export default function HomePage() {
               {showReception ? "Hide Reception" : "Reception Dashboard"}
             </button> */}
 
-            
-              <Link
-  to={`/${orgId}/qr`}
-  style={{
-    textDecoration: "none",
-    padding: "8px 12px",
-    borderRadius: 10,
-    border: "1px solid #e5e7eb",
-    fontSize: 13,
-    color: "rgb(255, 255, 255)",
-    background: "#ef4444",
-  }}
->
-  QR
-</Link>
+            <Link
+              to={`/${orgId}/qr`}
+              style={{
+                textDecoration: "none",
+                padding: "8px 12px",
+                borderRadius: 10,
+                border: "1px solid #e5e7eb",
+                fontSize: 13,
+                color: "rgb(255, 255, 255)",
+                background: "#ef4444",
+              }}
+            >
+              QR
+            </Link>
             <button
-  onClick={newChat}
-  style={{
-    padding: "8px 12px",
-    borderRadius: 10,
-    border: "1px solid #e5e7eb",
-    background: "#FF4242",
-    color: "#ffffff",
-    cursor: "pointer",
-    fontSize: 13,
-  }}
->
-  New chat
-</button>
-{/* Logout */}
-  <button
-    onClick={handleLogout}
-    style={{
-      padding: "8px 12px",
-      borderRadius: 10,
-      border: "1px solid #e5e7eb",
-      background: "#ef4444",
-      color: "#ffffff",
-      cursor: "pointer",
-      fontSize: 13,
-    }}
-  >
-    Logout
-  </button>
+              onClick={newChat}
+              style={{
+                padding: "8px 12px",
+                borderRadius: 10,
+                border: "1px solid #e5e7eb",
+                background: "#FF4242",
+                color: "#ffffff",
+                cursor: "pointer",
+                fontSize: 13,
+              }}
+            >
+              New chat
+            </button>
+            {/* Logout */}
+            <button
+              onClick={handleLogout}
+              style={{
+                padding: "8px 12px",
+                borderRadius: 10,
+                border: "1px solid #e5e7eb",
+                background: "#ef4444",
+                color: "#ffffff",
+                cursor: "pointer",
+                fontSize: 13,
+              }}
+            >
+              Logout
+            </button>
             {/* <Link to="/login">
               <button
                 style={{
@@ -458,17 +472,17 @@ export default function HomePage() {
         <main style={{ marginTop: 14 }}>
           <div
             style={{
-  display: "grid",
-  gridTemplateColumns: "1fr",
-  gap: 12,
-}}
+              display: "grid",
+              gridTemplateColumns: "1fr",
+              gap: 12,
+            }}
           >
             {/* CHAT PANEL */}
             <div
               style={{
                 background: "#ffffff",
-border: "1px solid #e5e7eb",
-boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
+                border: "1px solid #e5e7eb",
+                boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
                 borderRadius: 14,
                 padding: 12,
                 minHeight: "70vh",
@@ -537,10 +551,7 @@ boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
                           padding: "10px 12px",
                           borderRadius: 14,
                           lineHeight: 1.4,
-                          background:
-  m.role === "user"
-    ? "#e0f2fe"
-    : "#f3f4f6",
+                          background: m.role === "user" ? "#e0f2fe" : "#f3f4f6",
                           border: "1px solid rgba(255,255,255,0.10)",
                         }}
                       >
@@ -654,7 +665,7 @@ boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
                                     padding: 12,
                                     borderRadius: 12,
                                     background: "#FF4242",
-color: "#ffffff",
+                                    color: "#ffffff",
                                     border: "1px solid rgba(59,130,246,0.35)",
                                     lineHeight: 1.4,
                                   }}
@@ -760,7 +771,7 @@ color: "#ffffff",
                                           border:
                                             "1px solid rgba(255,255,255,0.14)",
                                           background: "#f9fafb",
-border: "1px solid #e5e7eb",
+                                          border: "1px solid #e5e7eb",
                                           display: "flex",
                                           justifyContent: "space-between",
                                           gap: 10,
@@ -831,7 +842,7 @@ border: "1px solid #e5e7eb",
                                             border:
                                               "1px solid rgba(255,255,255,0.14)",
                                             background: "#FF4242",
-color: "#ffffff",
+                                            color: "#ffffff",
                                             cursor: "pointer",
                                             whiteSpace: "nowrap",
                                           }}
@@ -872,7 +883,7 @@ color: "#ffffff",
                                           border:
                                             "1px solid rgba(255,255,255,0.14)",
                                           background: "#f9fafb",
-border: "1px solid #e5e7eb",
+                                          border: "1px solid #e5e7eb",
                                           display: "flex",
                                           justifyContent: "space-between",
                                           gap: 10,
@@ -910,20 +921,22 @@ border: "1px solid #e5e7eb",
                                               : ""}
                                           </div>
                                         </div>
-<button
-  onClick={() => send(String(optionNum))}
-  style={{
-    padding: "8px 12px",
-    borderRadius: 10,
-    border: "none",
-    background: "#FF4242",
-    color: "#ffffff",
-    cursor: "pointer",
-    whiteSpace: "nowrap",
-  }}
->
-  Select
-</button>
+                                        <button
+                                          onClick={() =>
+                                            send(String(optionNum))
+                                          }
+                                          style={{
+                                            padding: "8px 12px",
+                                            borderRadius: 10,
+                                            border: "none",
+                                            background: "#FF4242",
+                                            color: "#ffffff",
+                                            cursor: "pointer",
+                                            whiteSpace: "nowrap",
+                                          }}
+                                        >
+                                          Select
+                                        </button>
                                       </div>
                                     );
                                   })}
@@ -958,8 +971,8 @@ border: "1px solid #e5e7eb",
                     borderRadius: 12,
                     border: "1px solid rgba(255,255,255,0.14)",
                     background: "#ffffff",
-color: "#111827",
-border: "1px solid #e5e7eb",
+                    color: "#111827",
+                    border: "1px solid #e5e7eb",
                     outline: "none",
                   }}
                 />
@@ -971,7 +984,7 @@ border: "1px solid #e5e7eb",
                     borderRadius: 12,
                     border: "1px solid rgba(255,255,255,0.14)",
                     background: canSend ? "#FF4242" : "#e5e7eb",
-color: canSend ? "#ffffff" : "#9ca3af",
+                    color: canSend ? "#ffffff" : "#9ca3af",
                     cursor: canSend ? "pointer" : "not-allowed",
                     minWidth: 90,
                   }}
@@ -1318,7 +1331,7 @@ color: canSend ? "#ffffff" : "#9ca3af",
             )}
           </div> */}
 
-          {/* <div
+            {/* <div
             style={{
               marginTop: 12,
               fontSize: 12,
@@ -1329,7 +1342,7 @@ color: canSend ? "#ffffff" : "#9ca3af",
             Tip: Click <b>Reception Dashboard</b> to open the receptionist
             panel. It auto-refreshes every 4 seconds.
           </div> */}
-          </div> 
+          </div>
         </main>
       </div>
     </div>

@@ -5,11 +5,14 @@ import { useEffect, useState } from "react";
 
 export default function DoctorTimeOffPage() {
   const [list, setList] = useState([]);
+  const [slots, setSlots] = useState([]);
+  const [selectedSlot, setSelectedSlot] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const [form, setForm] = useState({
-    startAt: "",
-    endAt: "",
+    date: "",
+    startTime: "",
+    endTime: "",
     reason: "Holiday",
   });
 
@@ -20,7 +23,7 @@ export default function DoctorTimeOffPage() {
   async function fetchTimeOff() {
     try {
       const res = await axiosInstance.get(
-        "/api/v1/doctor-scheduling/me/time-off"
+        "/api/v1/doctor-scheduling/me/time-off",
       );
       setList(res.data);
     } catch {
@@ -30,23 +33,45 @@ export default function DoctorTimeOffPage() {
     }
   }
 
-  async function addTimeOff() {
+  async function loadSlots(date) {
     try {
-      await axiosInstance.post(
-        "/api/v1/doctor-scheduling/me/time-off",
-        form
+      const res = await axiosInstance.get(
+        `/api/v1/doctor-scheduling/me/day-slots?date=${date}`,
       );
-      fetchTimeOff();
-      setForm({ startAt: "", endAt: "", reason: "Holiday" });
+      setSlots(res.data);
     } catch {
-      alert("Failed to add time off");
+      alert("Failed to load doctor schedule");
+    }
+  }
+
+  async function addTimeOff() {
+    if (!form.date || !form.startTime || !form.endTime) {
+      alert("Select date and slot");
+      return;
+    }
+
+    try {
+      await axiosInstance.post("/api/v1/doctor-scheduling/me/time-off", {
+        startAt: `${form.date}T${form.startTime}`,
+        endAt: `${form.date}T${form.endTime}`,
+        reason: form.reason,
+      });
+
+      setForm({
+        date: "",
+        startTime: "",
+        endTime: "",
+        reason: "Holiday",
+      });
+
+      fetchTimeOff();
+    } catch {
+      alert("Failed to add leave");
     }
   }
 
   async function deleteTimeOff(id) {
-    await axiosInstance.delete(
-      `/api/v1/doctor-scheduling/me/time-off/${id}`
-    );
+    await axiosInstance.delete(`/api/v1/doctor-scheduling/me/time-off/${id}`);
     fetchTimeOff();
   }
 
@@ -54,49 +79,78 @@ export default function DoctorTimeOffPage() {
 
   return (
     <div className="p-8">
-
+      {/* Header */}
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">
-          Doctor Leave / Holiday
-        </h1>
+        <h1 className="text-3xl font-bold">Doctor Leave / Holiday</h1>
         <DashboardNavbar />
       </div>
 
-      {/* Add Leave Form */}
+      {/* Add Leave */}
       <div className="bg-white shadow rounded-xl p-6 mb-8">
-        <h2 className="text-xl font-semibold mb-4">Add Time Off</h2>
+        <h2 className="text-xl font-semibold mb-4">Add Leave</h2>
 
-        <div className="grid grid-cols-2 gap-4">
-          <input
-            type="datetime-local"
-            value={form.startAt}
-            onChange={(e) =>
-              setForm({ ...form, startAt: e.target.value })
-            }
-            className="border p-2 rounded"
-          />
+        {/* Date */}
+        <input
+          type="date"
+          value={form.date}
+          onChange={(e) => {
+            const d = e.target.value;
+            setForm({ ...form, date: d });
+            loadSlots(d);
+          }}
+          className="border p-2 rounded w-full mb-4"
+        />
 
-          <input
-            type="datetime-local"
-            value={form.endAt}
-            onChange={(e) =>
-              setForm({ ...form, endAt: e.target.value })
-            }
-            className="border p-2 rounded"
-          />
+        {/* Slot Selection */}
+        {slots.length > 0 && (
+          <div className="space-y-2 mb-4">
+            <p className="font-semibold">Select Slot Leave</p>
 
-          <input
-            value={form.reason}
-            onChange={(e) =>
-              setForm({ ...form, reason: e.target.value })
-            }
-            className="border p-2 rounded col-span-2"
-          />
-        </div>
+            {slots.map((slot, i) => (
+              <button
+                key={i}
+                onClick={() => {
+                  setSelectedSlot(i);
+                  setForm({
+                    ...form,
+                    startTime: slot.startTime,
+                    endTime: slot.endTime,
+                  });
+                }}
+                className={`border rounded p-2 w-full text-left 
+      ${selectedSlot === i ? "bg-blue-100 border-[#FF4242]" : "hover:bg-gray-100"}`}
+              >
+                {slot.startTime} → {slot.endTime}
+              </button>
+            ))}
+
+            {/* Full Day */}
+            <button
+              onClick={() => {
+                setSelectedSlot(null);
+                setForm({
+                  ...form,
+                  startTime: "00:00",
+                  endTime: "23:59",
+                });
+              }}
+              className="border rounded p-2 w-full bg-red-50"
+            >
+              Full Day Leave
+            </button>
+          </div>
+        )}
+
+        {/* Reason */}
+        <input
+          value={form.reason}
+          onChange={(e) => setForm({ ...form, reason: e.target.value })}
+          className="border p-2 rounded w-full mb-4"
+        />
 
         <Button
           onClick={addTimeOff}
-          className="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg"
+          className="bg-[#FF4242] hover:bg-[#FF4242] text-white px-6 py-2 rounded-lg"
         >
           Add Leave
         </Button>
@@ -109,17 +163,16 @@ export default function DoctorTimeOffPage() {
         {list.length === 0 && <p>No holidays added yet.</p>}
 
         {list.map((item) => (
-          <div
-            key={item.id}
-            className="flex justify-between border-b py-3"
-          >
+          <div key={item.id} className="flex justify-between border-b py-3">
             <div>
               <p>
                 <b>From:</b> {new Date(item.startAt).toLocaleString()}
               </p>
+
               <p>
                 <b>To:</b> {new Date(item.endAt).toLocaleString()}
               </p>
+
               <p>
                 <b>Reason:</b> {item.reason}
               </p>

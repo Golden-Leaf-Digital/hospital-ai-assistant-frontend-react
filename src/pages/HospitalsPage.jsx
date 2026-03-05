@@ -13,6 +13,7 @@ export default function HospitalsPage() {
       .then((data) => setOrgs(data))
       .finally(() => setLoading(false));
   }, []);
+  
 
   return (
     <div className="min-h-screen bg-gray-50 p-10">

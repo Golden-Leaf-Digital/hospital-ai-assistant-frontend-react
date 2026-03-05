@@ -21,15 +21,41 @@ export default function DoctorSchedulePage() {
     DAYS.map((d) => ({
       dayOfWeek: d.value,
       enabled: true,
-      startTime: "09:00",
-      endTime: "17:00",
-      slotMinutes: 15,
+      slots: [
+        {
+          startTime: "09:00",
+          endTime: "17:00",
+          slotMinutes: 15,
+        },
+      ],
     }))
   );
 
-  function updateDay(index, field, value) {
+  function toggleDay(index) {
     const copy = [...week];
-    copy[index][field] = value;
+    copy[index].enabled = !copy[index].enabled;
+    setWeek(copy);
+  }
+
+  function updateSlot(dayIndex, slotIndex, field, value) {
+    const copy = [...week];
+    copy[dayIndex].slots[slotIndex][field] = value;
+    setWeek(copy);
+  }
+
+  function addSlot(dayIndex) {
+    const copy = [...week];
+    copy[dayIndex].slots.push({
+      startTime: "09:00",
+      endTime: "12:00",
+      slotMinutes: 15,
+    });
+    setWeek(copy);
+  }
+
+  function removeSlot(dayIndex, slotIndex) {
+    const copy = [...week];
+    copy[dayIndex].slots.splice(slotIndex, 1);
     setWeek(copy);
   }
 
@@ -39,7 +65,10 @@ export default function DoctorSchedulePage() {
 
       const payload = week
         .filter((d) => d.enabled)
-        .map(({ enabled, ...rest }) => rest);
+        .map((d) => ({
+          dayOfWeek: d.dayOfWeek,
+          slots: d.slots,
+        }));
 
       await axiosInstance.post(
         "/api/v1/doctor-scheduling/me/weekly-schedule",
@@ -59,99 +88,121 @@ export default function DoctorSchedulePage() {
 
       {/* Header */}
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">
-          Weekly Schedule
-        </h1>
+        <h1 className="text-3xl font-bold">Doctor Weekly Schedule</h1>
         <DashboardNavbar />
       </div>
 
-      {/* Leave Button */}
       <div className="mb-6">
         <Link to="/doctor/dashboard/schedule/time-off">
-          <Button className="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2 rounded-lg">
+          <Button className="bg-[#FF4242] text-white px-5 py-2 rounded-lg">
             Manage Leave / Holiday
           </Button>
         </Link>
       </div>
 
-      <div className="bg-white rounded-xl shadow p-6 overflow-x-auto">
-        <table className="w-full">
-          <thead>
-            <tr className="text-left border-b">
-              <th>Working</th>
-              <th>Day</th>
-              <th>Start</th>
-              <th>End</th>
-              <th>Slot (mins)</th>
-            </tr>
-          </thead>
+      <div className="space-y-6">
 
-          <tbody>
-            {week.map((day, i) => (
-              <tr key={day.dayOfWeek} className="border-b">
-                <td>
-                  <input
-                    type="checkbox"
-                    checked={day.enabled}
-                    onChange={(e) =>
-                      updateDay(i, "enabled", e.target.checked)
-                    }
-                  />
-                </td>
+        {week.map((day, dayIndex) => (
+          <div
+            key={day.dayOfWeek}
+            className="bg-white shadow rounded-xl p-5"
+          >
+            {/* Day Header */}
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold">
+                {DAYS[dayIndex].label}
+              </h2>
 
-                <td className="py-3">{DAYS[i].label}</td>
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={day.enabled}
+                  onChange={() => toggleDay(dayIndex)}
+                />
+                Working
+              </label>
+            </div>
 
-                <td>
-                  <input
-                    type="time"
-                    disabled={!day.enabled}
-                    value={day.startTime}
-                    onChange={(e) =>
-                      updateDay(i, "startTime", e.target.value)
-                    }
-                    className="border p-2 rounded"
-                  />
-                </td>
+            {day.enabled && (
+              <>
+                {day.slots.map((slot, slotIndex) => (
+                  <div
+                    key={slotIndex}
+                    className="flex items-center gap-4 mb-3"
+                  >
+                    <input
+                      type="time"
+                      value={slot.startTime}
+                      onChange={(e) =>
+                        updateSlot(
+                          dayIndex,
+                          slotIndex,
+                          "startTime",
+                          e.target.value
+                        )
+                      }
+                      className="border p-2 rounded"
+                    />
 
-                <td>
-                  <input
-                    type="time"
-                    disabled={!day.enabled}
-                    value={day.endTime}
-                    onChange={(e) =>
-                      updateDay(i, "endTime", e.target.value)
-                    }
-                    className="border p-2 rounded"
-                  />
-                </td>
+                    <span>to</span>
 
-                <td>
-                  <input
-                    type="number"
-                    disabled={!day.enabled}
-                    value={day.slotMinutes}
-                    onChange={(e) =>
-                      updateDay(
-                        i,
-                        "slotMinutes",
-                        Number(e.target.value)
-                      )
-                    }
-                    className="border p-2 rounded w-24"
-                  />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                    <input
+                      type="time"
+                      value={slot.endTime}
+                      onChange={(e) =>
+                        updateSlot(
+                          dayIndex,
+                          slotIndex,
+                          "endTime",
+                          e.target.value
+                        )
+                      }
+                      className="border p-2 rounded"
+                    />
 
-        <Button
-          onClick={saveSchedule}
-          className="mt-6 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg"
-        >
-          {loading ? "Saving..." : "Save Weekly Schedule"}
-        </Button>
+                    <input
+                      type="number"
+                      value={slot.slotMinutes}
+                      onChange={(e) =>
+                        updateSlot(
+                          dayIndex,
+                          slotIndex,
+                          "slotMinutes",
+                          Number(e.target.value)
+                        )
+                      }
+                      className="border p-2 rounded w-24"
+                    />
+
+                    <button
+                      onClick={() =>
+                        removeSlot(dayIndex, slotIndex)
+                      }
+                      className="text-red-500"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                ))}
+
+                <button
+                  onClick={() => addSlot(dayIndex)}
+                  className="text-[#FF4242] font-medium"
+                >
+                  + Add Time Slot
+                </button>
+              </>
+            )}
+          </div>
+        ))}
       </div>
+
+      <Button
+        onClick={saveSchedule}
+        className="mt-8 bg-[#FF4242] text-white px-6 py-2 rounded-lg"
+      >
+        {loading ? "Saving..." : "Save Schedule"}
+      </Button>
     </div>
   );
 }

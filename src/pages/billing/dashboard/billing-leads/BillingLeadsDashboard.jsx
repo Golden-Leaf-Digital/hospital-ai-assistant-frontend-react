@@ -13,6 +13,15 @@ export default function BillingLeadsDashboard() {
     fetchLeads();
   }, []);
 
+   const STATUS_OPTIONS = [
+    "PENDING",
+    "CONTACTED",
+    "IN_PROGRESS",
+    "RESOLVED",
+    "REJECTED",
+  ];
+
+
   async function fetchLeads() {
     try {
       const token = localStorage.getItem("token");
@@ -28,14 +37,11 @@ export default function BillingLeadsDashboard() {
       const user = await userRes.json();
       const orgId = user.orgId;
 
-      const leadsRes = await fetch(
-        `${BASE_URL}/api/billing?orgId=${orgId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const leadsRes = await fetch(`${BASE_URL}/api/billing?orgId=${orgId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       const data = await leadsRes.json();
       setLeads(data);
@@ -47,35 +53,48 @@ export default function BillingLeadsDashboard() {
     }
   }
 
+async function updateStatus(id, status) {
+    try {
+      const token = localStorage.getItem("token");
+
+      await fetch(`${BASE_URL}/api/billing/lead/${id}/status`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ status }),
+      });
+
+      setLeads((prev) =>
+        prev.map((lead) => (lead.id === id ? { ...lead, status } : lead)),
+      );
+    } catch (err) {
+      console.error(err);
+      alert("Failed to update status");
+    }
+  }
+
+
   const filteredLeads = leads.filter((lead) => {
     const matchesSearch =
-      (lead.name || "")
-        .toLowerCase()
-        .includes(search.toLowerCase()) ||
-      (lead.phone || "")
-        .toLowerCase()
-        .includes(search.toLowerCase()) ;
-      
+      (lead.name || "").toLowerCase().includes(search.toLowerCase()) ||
+      (lead.phone || "").toLowerCase().includes(search.toLowerCase());
 
     const matchesDate = dateFilter
-      ? new Date(lead.createdAt)
-          .toISOString()
-          .slice(0, 10) === dateFilter
+      ? new Date(lead.createdAt).toISOString().slice(0, 10) === dateFilter
       : true;
 
     return matchesSearch && matchesDate;
   });
 
-  if (loading)
-    return <div className="p-8">Loading billing leads...</div>;
+  if (loading) return <div className="p-8">Loading billing leads...</div>;
 
   return (
     <div className="p-8">
       {/* Navbar */}
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold mb-6">
-          Billing Enquiries
-        </h2>
+        <h2 className="text-xl font-semibold mb-6">Billing Enquiries</h2>
       </div>
 
       {/* Filters */}
@@ -120,6 +139,7 @@ export default function BillingLeadsDashboard() {
               <th className="px-4 py-3 text-left">Name</th>
               <th className="px-4 py-3 text-left">Phone</th>
               <th className="px-4 py-3 text-left">Created At</th>
+              <th className="px-4 py-3 text-left">Status</th>
             </tr>
           </thead>
 
@@ -136,22 +156,50 @@ export default function BillingLeadsDashboard() {
                   <td className="px-4 py-3">{lead.id}</td>
                   <td className="px-4 py-3">{lead.name}</td>
                   <td className="px-4 py-3">
-  <div className="flex items-center gap-2">
-    <span>{lead.phone || "N/A"}</span>
+                    <div className="flex items-center gap-2">
+                      <span>{lead.phone || "N/A"}</span>
 
-    {lead.phone && (
-      <a
-        href={`tel:${lead.phone}`}
-        className="bg-green-100 text-green-700 p-1 rounded-full hover:bg-green-200 transition"
-        title="Call"
-      >
-        <Phone size={16} />
-      </a>
-    )}
-  </div>
-</td>
+                      {lead.phone && (
+                        <a
+                          href={`tel:${lead.phone}`}
+                          className="bg-green-100 text-green-700 p-1 rounded-full hover:bg-green-200 transition"
+                          title="Call"
+                        >
+                          <Phone size={16} />
+                        </a>
+                      )}
+                    </div>
+                  </td>
                   <td className="px-4 py-3">
                     {new Date(lead.createdAt).toLocaleString()}
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`px-2 py-1 text-xs rounded font-medium
+        ${lead.status === "PENDING" ? "bg-yellow-100 text-yellow-700" : ""}
+        ${lead.status === "CONTACTED" ? "bg-blue-100 text-blue-700" : ""}
+        ${lead.status === "IN_PROGRESS" ? "bg-purple-100 text-purple-700" : ""}
+        ${lead.status === "RESOLVED" ? "bg-green-100 text-green-700" : ""}
+        ${lead.status === "REJECTED" ? "bg-red-100 text-red-700" : ""}
+      `}
+                      >
+                        {lead.status || "PENDING"}
+                      </span>
+
+                      <select
+                        value={lead.status || "PENDING"}
+                        onChange={(e) => updateStatus(lead.id, e.target.value)}
+                        className="border rounded px-2 py-1 text-xs cursor-pointer"
+                        title="Update status"
+                      >
+                        {STATUS_OPTIONS.map((status) => (
+                          <option key={status} value={status}>
+                            {status}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                   </td>
                 </tr>
               ))
