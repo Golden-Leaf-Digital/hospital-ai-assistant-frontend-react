@@ -141,7 +141,7 @@ export default function HomePage() {
           channel: "web",
           externalId: externalId || "local-dev-user",
           orgId: orgId,
-          mobile,
+          phone: mobile,
         }),
       });
 
@@ -177,7 +177,7 @@ export default function HomePage() {
           channel: "web",
           externalId: externalId || "local-dev-user",
           orgId: orgId,
-          mobile,
+          phone: mobile,
         }),
       });
 
@@ -211,9 +211,9 @@ export default function HomePage() {
               sessionId: sid,
               text: "show available slots",
               channel: "web",
-              externalId,
-              orgId,
-              mobile,
+              externalId: externalId,
+              orgId: orgId,
+              phone: mobile,
             }),
           });
 
