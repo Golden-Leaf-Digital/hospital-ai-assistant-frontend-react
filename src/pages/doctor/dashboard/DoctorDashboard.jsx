@@ -15,7 +15,12 @@ export default function DoctorDashboard() {
 
   async function fetchAppointments() {
     try {
-      const res = await axiosInstance.get("/api/appointments/doctor");
+      const orgId = localStorage.getItem("orgId");
+
+      const res = await axiosInstance.get("/api/appointments/doctor", {
+        params: { orgId },
+      });
+
       setAppointments(res.data);
     } catch (err) {
       console.error("Failed to fetch appointments", err);
@@ -25,17 +30,13 @@ export default function DoctorDashboard() {
     }
   }
 
-  if (loading)
-    return <div className="p-8">Loading appointments...</div>;
+  if (loading) return <div className="p-8">Loading appointments...</div>;
 
   return (
     <div className="p-8">
-
       {/* Header */}
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">
-          Doctor Dashboard
-        </h1>
+        <h1 className="text-3xl font-bold">Doctor Dashboard</h1>
         <DashboardNavbar />
       </div>
 

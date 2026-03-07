@@ -9,13 +9,19 @@ export default function CreateOrgUserForm() {
   const [departments, setDepartments] = useState([]);
 
   /* -------------------- Load departments -------------------- */
+  /* -------------------- Load departments -------------------- */
   useEffect(() => {
     async function loadDepartments() {
       try {
-        const res = await axiosInstance.get("/api/v1/departments");
+        const orgId = localStorage.getItem("orgId"); // get org id
+
+        const res = await axiosInstance.get("/api/v1/departments", {
+          params: { orgId },
+        });
+
         setDepartments(res.data);
-      } catch {
-        console.error("Failed to load departments");
+      } catch (err) {
+        console.error("Failed to load departments", err);
       }
     }
 
