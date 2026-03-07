@@ -11,20 +11,20 @@ export default function ReceptionistDashboard() {
   const [loading, setLoading] = useState(true);
   const token = localStorage.getItem("token");
 
-let orgId = "org-62484079";
+  let orgId = "org-62484079";
 
-if (token) {
-  try {
-    const decoded = jwtDecode(token);
-    orgId =
-      decoded.orgId ||
-      decoded.organizationId ||
-      decoded.org ||
-      "org-62484079";
-  } catch (err) {
-    console.error("Invalid token", err);
+  if (token) {
+    try {
+      const decoded = jwtDecode(token);
+      orgId =
+        decoded.orgId ||
+        decoded.organizationId ||
+        decoded.org ||
+        "org-62484079";
+    } catch (err) {
+      console.error("Invalid token", err);
+    }
   }
-}
 
   useEffect(() => {
     fetchAppointments();
@@ -42,17 +42,13 @@ if (token) {
     }
   }
 
-  if (loading)
-    return <div className="p-8">Loading appointments...</div>;
+  if (loading) return <div className="p-8">Loading appointments...</div>;
 
   return (
     <div className="p-8">
-
       {/* Header */}
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">
-          Receptionist Dashboard
-        </h1>
+        <h1 className="text-3xl font-bold">Receptionist Dashboard</h1>
 
         <DashboardNavbar />
       </div>
@@ -64,23 +60,11 @@ if (token) {
             + Add Appointment
           </Button>
         </Link>
-
-        <Link to="/receptionist/dashboard/insurance-leads">
-  <Button className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg">
-    Insurance Leads
-  </Button>
-</Link>
-
-<Link to="/receptionist/dashboard/billing-leads">
-  <Button className="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2 rounded-lg">
-    Billing Leads
-  </Button>
-</Link>
         <Link to={`/${orgId}/whatsapp`}>
-  <Button className="bg-green-500 hover:bg-green-600 text-white px-5 py-2 rounded-lg">
-    WhatsApp Web
-  </Button>
-</Link>
+          <Button className="bg-green-500 hover:bg-green-600 text-white px-5 py-2 rounded-lg">
+            WhatsApp Web
+          </Button>
+        </Link>
       </div>
 
       {/* Appointment Table */}
