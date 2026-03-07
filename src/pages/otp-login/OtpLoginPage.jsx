@@ -113,7 +113,7 @@ export default function OtpLoginPage() {
             </Link>
 
             <button className="px-10 py-3 rounded-lg bg-[#FF4242] text-white font-semibold shadow">
-              OTP Login
+              Log In (Patient)
             </button>
           </div>
 

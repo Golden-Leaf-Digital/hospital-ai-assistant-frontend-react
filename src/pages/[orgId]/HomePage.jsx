@@ -75,10 +75,10 @@ export default function HomePage() {
 
   useEffect(() => {
     const savedSession = localStorage.getItem(LS_SESSION_KEY) || "";
-    const mobile = localStorage.getItem("patientPhone");
+    const phone = localStorage.getItem("patientPhone");
 
     // If logged in but session was created before login → reset session
-    if (mobile && savedSession) {
+    if (phone && savedSession) {
       localStorage.removeItem(LS_SESSION_KEY);
       setSessionId("");
     } else if (savedSession) {
@@ -133,7 +133,7 @@ export default function HomePage() {
 
     setBusy(true);
     try {
-      const mobile = localStorage.getItem("patientPhone");
+      const phone = localStorage.getItem("patientPhone");
       const res = await fetch(`${backendBaseUrl()}/v1/sessions/resolve`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -141,7 +141,7 @@ export default function HomePage() {
           channel: "web",
           externalId: externalId || "local-dev-user",
           orgId: orgId,
-          phone: mobile,
+          phone,
         }),
       });
 
@@ -166,7 +166,7 @@ export default function HomePage() {
     try {
       const sid = await ensureSession();
 
-      const mobile = localStorage.getItem("patientPhone");
+      const phone = localStorage.getItem("patientPhone");
       const res = await fetch(`${backendBaseUrl()}/v1/brain/message`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -177,7 +177,7 @@ export default function HomePage() {
           channel: "web",
           externalId: externalId || "local-dev-user",
           orgId: orgId,
-          phone: mobile,
+          phone,
         }),
       });
 
@@ -202,7 +202,7 @@ export default function HomePage() {
           ]);
 
           const sid = sessionId || (await ensureSession());
-          const mobile = localStorage.getItem("patientPhone");
+          const phone = localStorage.getItem("patientPhone");
 
           const retry = await fetch(`${backendBaseUrl()}/v1/brain/message`, {
             method: "POST",
@@ -211,9 +211,9 @@ export default function HomePage() {
               sessionId: sid,
               text: "show available slots",
               channel: "web",
-              externalId: externalId,
-              orgId: orgId,
-              phone: mobile,
+              externalId,
+              orgId,
+              phone,
             }),
           });
 
@@ -845,6 +845,83 @@ export default function HomePage() {
                                             color: "#ffffff",
                                             cursor: "pointer",
                                             whiteSpace: "nowrap",
+                                          }}
+                                        >
+                                          Select
+                                        </button>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              );
+                            }
+
+                            if (a.type === "DOCTOR_OPTIONS") {
+                              const doctors = a.payload || [];
+                              if (
+                                !Array.isArray(doctors) ||
+                                doctors.length === 0
+                              )
+                                return null;
+
+                              return (
+                                <div
+                                  key={i}
+                                  style={{
+                                    marginTop: 10,
+                                    display: "grid",
+                                    gap: 8,
+                                  }}
+                                >
+                                  {doctors.map((d, di) => {
+                                    const optionNum = d.option ?? di + 1;
+
+                                    return (
+                                      <div
+                                        key={`${optionNum}-${di}`}
+                                        style={{
+                                          padding: "10px 10px",
+                                          borderRadius: 12,
+                                          background: "#f9fafb",
+                                          border: "1px solid #e5e7eb",
+                                          display: "flex",
+                                          justifyContent: "space-between",
+                                          alignItems: "center",
+                                          gap: 10,
+                                        }}
+                                      >
+                                        <div>
+                                          <div style={{ fontWeight: 700 }}>
+                                            Option {optionNum}
+                                          </div>
+
+                                          <div style={{ fontSize: 13 }}>
+                                            {d.doctorName}
+                                          </div>
+
+                                          {d.department && (
+                                            <div
+                                              style={{
+                                                fontSize: 12,
+                                                opacity: 0.8,
+                                              }}
+                                            >
+                                              {d.department}
+                                            </div>
+                                          )}
+                                        </div>
+
+                                        <button
+                                          onClick={() =>
+                                            send(String(optionNum))
+                                          }
+                                          style={{
+                                            padding: "8px 12px",
+                                            borderRadius: 10,
+                                            border: "none",
+                                            background: "#FF4242",
+                                            color: "#fff",
+                                            cursor: "pointer",
                                           }}
                                         >
                                           Select
