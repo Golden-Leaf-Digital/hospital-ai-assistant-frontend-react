@@ -11,7 +11,7 @@ export default function ReceptionistDashboard() {
   const [loading, setLoading] = useState(true);
   const token = localStorage.getItem("token");
 
-  let orgId = "org-62484079";
+  const orgId = localStorage.getItem("orgId"); 
 
   if (token) {
     try {
